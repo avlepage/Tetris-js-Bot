@@ -2,7 +2,7 @@
 <html>
 <head>
     
-    <title>Will Clark's Projects</title>
+    <title>Tetris js</title>
     
     
     <meta charset="utf-8" />
@@ -10,15 +10,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     
     <link rel="stylesheet" type="text/css" href="tetris_01.css">
-    <script src="tetris_01.js"></script>
     
-
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    
+    
     
 </head>
     
     
 <body>
-
+    <div id="container">
+    
+        <div id="gamearea">
+            <table id="gameboard">
+            </table>
+            
+            <table id="nextpiecearea">
+            
+            </table>
+            <div id="scorebox">
+                <p>Score:</p>
+                <p id="score">3452</p>
+            </div>
+        </div>
+    </div>
+    <script src="tetris_01.js"></script>
 </body>
 </html>

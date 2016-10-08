@@ -1,3 +1,68 @@
 html {
-    
+    font-family: "helvetica";
+    background-color: #F8F8F8;
+}
+
+#gamearea {
+    display: block;
+    width: 400px;
+    background-color: #DDD;
+    padding: 9px;
+    position: relative;
+    border: 1px solid #011;
+    border-radius: 4px;
+}
+
+#gameboard {
+    border-spacing: 0px;
+    border-color: #011;
+    border-width: 0px 0px 1px 1px;
+    border-style: solid;
+}
+
+#gameboard tr {
+    margin: 0px;
+}
+
+#gameboard tr th {
+    background-color: #FCFFFF;
+    width: 29px;
+    height: 29px;
+    margin: 0px;
+    padding: 0px;
+    border-color: #011;
+    border-width: 1px 1px 0px 0px;
+    border-style: solid;
+}
+
+#nextpiecearea {
+    width: 88px;
+    height: 88px;
+    background-color: #F8FFFF;
+    position: absolute;
+    right: 8px;
+    top: 9px;
+    border: 1px solid #011;
+    border-radius: 4px;
+    background-image: url(images/block_icon_z.png);
+    background-size: contain;
+}
+
+#scorebox {
+    width: 95px;
+    height: 48px;
+    background-color: #F8FFFF;
+    position: absolute;
+    right: 6px;
+    top: 105px;
+    border: 1px solid #011;
+    border-radius: 4px;
+}
+
+#scorebox p {
+    margin: 4px 0 0 0;
+    padding: 0;
+    width: inherit;
+    text-align: center;
+    color: #011;
 }
