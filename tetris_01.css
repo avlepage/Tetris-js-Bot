@@ -48,21 +48,29 @@ html {
     background-size: contain;
 }
 
-#scorebox {
+.infobox {
     width: 95px;
     height: 48px;
     background-color: #F8FFFF;
     position: absolute;
     right: 6px;
-    top: 105px;
     border: 1px solid #011;
     border-radius: 4px;
 }
 
-#scorebox p {
+.infobox p{
     margin: 4px 0 0 0;
     padding: 0;
     width: inherit;
     text-align: center;
     color: #011;
+}
+
+#scorebox {
+    top: 105px;
+}
+
+
+#rowbox {
+    top: 163px;
 }
