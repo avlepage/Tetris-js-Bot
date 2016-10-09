@@ -265,7 +265,7 @@ var activeBlocks = (function() {
     }
 })()
 
-
+/*
 $(document).keydown(function(key) {
     switch(key.keyCode) {
         case 37:
@@ -283,7 +283,7 @@ $(document).keydown(function(key) {
         default:
     }
 })
-
+*/
 
 //activeBlocks.newBlock()
 //setInterval(activeBlocks.processBlock, 1000)
