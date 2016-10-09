@@ -172,6 +172,7 @@ var activeBlocks = (function() {
                 output.push([row + (blockShapes[blockType][i][rev] * rowRev), col + (blockShapes[blockType][i][invRev] * colRev), blockType])
             }
             
+            
             return output
         },
         genNextBlock = function() {
@@ -203,27 +204,23 @@ var activeBlocks = (function() {
                 trialNewPos = reposBlock(actBlockArr[0][0], actBlockArr[0][1], trialBlockOrientation),
                 i = 0,
                 j = 0,
-                freeSpace = 0, // Make sure space isn't already occupied on rotate
-                trialPositions = [0, 1, -1]
-            
-            for (i = 0; i < 3; i++) {
+                freeSpace = 0 // Make sure space isn't already occupied on rotate
 
-                trialNewPos = reposBlock(actBlockArr[0][0], actBlockArr[0][1], trialBlockOrientation)
-                
-                for (j = 0; j < 4; j++) {
-                    if (!(staticBlocks.checkTile(trialNewPos[j][0], trialNewPos[j][1] + trialPositions[i]))) {
-                        freeSpace++
-                    }
-                }
-                
-                if (freeSpace === 4) {
-                    actBlockArr = trialNewPos
-                    blockOrientation = trialBlockOrientation
-                    colourActive()
-                    return
+            trialNewPos = reposBlock(actBlockArr[0][0], actBlockArr[0][1], trialBlockOrientation)
+
+            for (j = 0; j < 4; j++) {
+                if (!(staticBlocks.checkTile(trialNewPos[j][0], trialNewPos[j][1]))) {
+                    freeSpace++
                 }
             }
 
+            if (freeSpace === 4) {
+                actBlockArr = trialNewPos
+                blockOrientation = trialBlockOrientation
+                colourActive()
+                return
+            }
+            
         },
         processBlock : function() { // Returns true if block is placed
             var i = 0,
@@ -328,11 +325,28 @@ $(document).on('gameover', function(event, score) {
 gameFlow.startGame()
 
 
+
+
+
+
+
+
+
+
 // AI CODE HERE
 
 var learner = (function() {
     
-    var genData = []
+    var genData = [],
+        blockShapes = { // Rotation 0, 1, 2, 3
+            't' : [4, [0, -1], [-1, 0],  [0, 1]],
+            'i' : [2, [1, 0],  [2, 0],   [-1, 0]],
+            's' : [2, [0, -1],  [-1, 0],  [-1, 1]],
+            'z' : [2, [0, 1], [-1, 0],  [-1, -1]],
+            'o' : [1, [0, -1], [-1, -1], [-1, 0]],
+            'l' : [4, [0, 1],  [0, -1],  [-1, 1]],
+            'j' : [4, [0, 1],  [0, -1],  [-1, -1]]
+        }
     
     
     var newGen = function() {
@@ -371,9 +385,196 @@ var learner = (function() {
         }
     }
     
+    var fitness = function(activeArr, staticArr) {
+        return 1
+    }
+    
+    var reposBlock = function(row, col, ori, blockType) {
+            var rev = ori % 2,
+                invRev = (1 + rev) % 2,
+                rowRev = (ori < 2) ? 1 : -1,
+                colRev = (ori === 0 || ori === 3) ? 1 : -1,
+                output = [[row, col, blockType]],
+                i = 0
+            
+            for (i = 1; i < 4; i++) {
+                output.push([row + (blockShapes[blockType][i][rev] * rowRev), col + (blockShapes[blockType][i][invRev] * colRev), blockType])
+            }
+            
+            return output
+        }
+    
+    var rotateBlock = function(trialOrientation, activeArr, staticArr){
+        var trialNewPos = reposBlock(activeArr[0][0], activeArr[0][1], trialOrientation, activeArr[0][2]),
+            i = 0,
+            freeSpace = 0 // Make sure space isn't already occupied on rotate
+
+        for (i = 0; i < 4; i++) {
+
+            if (staticArr[trialNewPos[i][0]][trialNewPos[i][1]] === 0) {
+                freeSpace++
+                
+            }
+
+        }
+
+        
+
+        if (freeSpace === 4) {
+            return trialNewPos
+        }
+        return false
+
+    }
+    
+    var shiftBlock = function(dir, activeArr, staticArr, blockOrientation) { // -1 for left, 1 for right
+        var trialNewPos = reposBlock(activeArr[0][0], activeArr[0][1] + dir, blockOrientation, activeArr[0][2]),
+            i = 0,
+            moveIsAllowed = true
+
+        for (i = 0; i < 4; i++) {
+            if (trialNewPos[i][1] < 0 || trialNewPos[i][1] > 9 || staticArr[trialNewPos[i][0]][trialNewPos[i][1]] !== 0) {
+                moveIsAllowed = false
+            }
+        }
+
+        if (moveIsAllowed) {
+            return trialNewPos
+        }
+        return false
+    }
+    
+    var processBlock = function(activeArr, staticArr, blockOrientation) { // Returns true if block is placed
+            var i = 0,
+                atBottom = false
+            
+            for (i = 0; i < 4; i++) {
+                if (activeArr[i][0] === 21 || staticArr[activeArr[i][0] + 1][activeArr[i][1]] !== 0) {
+                    atBottom = true
+                }
+            }
+            
+            if (atBottom) {
+                return false
+            } else {
+                return reposBlock(activeArr[0][0] + 1, activeArr[0][1], blockOrientation, activeArr[0][2])
+            }
+
+        }
+    
+    var findMove = function(board, piece) {
+        var i = 0,
+            movesData = {score : 0, moves : []}
+        
+        for (i = 0; i < blockShapes[piece[0][2]][0]; i++) { //each orientation
+            
+            let trialOrientation = rotateBlock(i, piece, board)
+        
+            
+            if (trialOrientation) {
+                let canStillMove = true,
+                    trialPosition = [],
+                    j = 0
+                
+                while (trialPosition) { // Try moving left
+                    j--
+                    trialPosition = shiftBlock(j, trialOrientation, board, i)
+                    
+                    if (trialPosition) { // if move j blocks left is valid
+                        let trialDrop = trialPosition,
+                            lastTrialDrop = trialPosition,
+                            fitnessScore = 0,
+                            k = 0
+                        
+                        while (trialDrop) {
+                            k++
+                            trialDrop = processBlock(trialDrop, board, i)
+                            
+                            if (trialDrop) {
+                                lastTrialDrop = trialDrop
+                            } else {
+                                fitnessScore = fitness(lastTrialDrop, board)
+                                
+                                if (fitnessScore > movesData.score) {
+                                    movesData.score = fitnessScore
+                                    movesData.moves = [i, j, k]
+                                }
+                                
+                            }
+                            
+                        }
+                    }
+                    
+                }
+                
+                trialPosition = []
+                j = 0
+                
+                while (trialPosition) { // Try moving right
+                    j++
+                    trialPosition = shiftBlock(j, trialOrientation, board, i)
+                    
+                    if (trialPosition) { // if move j blocks left is valid
+                        let trialDrop = trialPosition,
+                            lastTrialDrop = trialPosition,
+                            fitnessScore = 0,
+                            k = 0
+                        
+                        while (trialDrop) {
+                            k++
+                            trialDrop = processBlock(trialDrop, board, i)
+                            
+                            if (trialDrop) {
+                                lastTrialDrop = trialDrop
+                            } else {
+                                fitnessScore = fitness(lastTrialDrop, board)
+                                
+                                if (fitnessScore > movesData.score) {
+                                    movesData.score = fitnessScore
+                                    movesData.moves = [i, j, k]
+                                }
+                                
+                            }
+                            
+                        }
+                    }
+                    
+                }
+
+            } else {
+                break
+            }
+            
+        }
+        return movesData
+    }
+    
+    var doMove = function(activeArr, staticArr) {
+        var moveSeq = findMove(staticArr, activeArr),
+            i = 0
+        
+        
+        console.log(moveSeq.moves)
+        
+        for (i = 0; i < moveSeq.moves[0]; i++) {
+            activeBlocks.rotateBlock()
+        }
+        
+        activeBlocks.shiftBlock(moveSeq.moves[1])
+        
+        
+        for (i = 0; i < moveSeq.moves[2]; i++) {
+            activeBlocks.processBlock()
+        }
+        
+    }
+    
     return {
-        "nextGeneration" : function() {
+        nextGeneration : function() {
             newGen()
+        },
+        figureMove : function() {
+            doMove(activeBlocks.getActiveArr(), staticBlocks.getStaticArr())
         }
     }
     
