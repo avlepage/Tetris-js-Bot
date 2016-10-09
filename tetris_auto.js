@@ -326,3 +326,55 @@ $(document).on('gameover', function(event, score) {
 })
 
 gameFlow.startGame()
+
+
+// AI CODE HERE
+
+var learner = (function() {
+    
+    var genData = []
+    
+    
+    var newGen = function() {
+        var i = 0,
+            currentGen = genData.length + 1
+        
+        genData.push([])
+        
+        $('#gens').append('<li class="gen" id="gen' + currentGen + '"><p>' + currentGen + '</p></li>')
+        
+        for (i = 0; i < 10; i++) {
+            
+            let newCreature = {
+                "name" : chance.first(),
+                "score" : -1,
+                "parent" : "",
+                "placeInGen" : i
+            }
+            
+            genData[currentGen - 1].push(newCreature)
+            
+            $('#gen' + currentGen).append(
+                '<div class="creature" id="g'
+                + currentGen
+                + 'c'
+                + i 
+                + '"><p class="creaturenumber">C'
+                + i
+                + '</p><p class="creaturescore">0</p><p class="creaturename">'
+                + newCreature.name
+                + '</p></div>'
+            
+            )
+        }
+    }
+    
+    return {
+        "nextGeneration" : function() {
+            newGen()
+        }
+    }
+    
+    
+    
+})()
