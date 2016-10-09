@@ -193,6 +193,7 @@ var activeBlocks = (function() {
             genNextBlock()
             
             for (i = 0; i < actBlockArr.length; i++) {
+
                 if (actBlockArr[i][0] >= 0 && staticBlocks.checkTile(actBlockArr[i][0], actBlockArr[i][1])) {
                     return true // If game is over
                 }
@@ -241,7 +242,7 @@ var activeBlocks = (function() {
             }
             colourActive()
             
-            return gameOver
+            return {"gameOver" : gameOver, "atBottom" : atBottom}
         },
         shiftBlock : function(dir) { // -1 for left, 1 for right
             var trialNewPos = reposBlock(actBlockArr[0][0], actBlockArr[0][1] + dir, blockOrientation),
@@ -261,6 +262,14 @@ var activeBlocks = (function() {
         },
         getActiveArr : function() {
             return actBlockArr
+        },
+        drop : function() {
+            var dropped = false
+            
+            while (!dropped) {
+                dropped = activeBlocks.processBlock().atBottom
+            }
+            
         }
     }
 })()
@@ -289,40 +298,6 @@ $(document).keydown(function(key) {
 //setInterval(activeBlocks.processBlock, 1000)
 
 
-var gameFlow = (function() {
-    var gameInProgress = false
-    
-    var nextTick = function() {
-        
-        if (gameInProgress) {
-            if (!activeBlocks.processBlock()) {
-                setTimeout(nextTick, 800)
-            } else {
-                gameInProgress = false
-                $(document).trigger('gameover', [staticBlocks.returnScore()])
-            }
-            
-        }
-    }
-    
-    return {
-        startGame : function() {
-            activeBlocks.newBlock()
-            gameInProgress = true
-            nextTick()
-        }
-    }
-})()
-
-
-
-$(document).on('gameover', function(event, score) {
-    console.log("Score is: " + score)
-    staticBlocks.resetGame()
-    gameFlow.startGame()
-})
-
-gameFlow.startGame()
 
 
 
@@ -385,8 +360,88 @@ var learner = (function() {
         }
     }
     
+    var removeRow = function(row, grid) {
+        var i = 0,
+            j = 0
+        
+        for (i = row; i > 0; i--) {
+            for (j = 0; j < 10; j++) {
+                grid[i][j] = grid[i-1][j]
+            }
+        }
+        
+        for (j = 0; j < 10; j++) {
+            grid[0][j] = 0
+        }
+    }
+    
     var fitness = function(activeArr, staticArr) {
-        return 1
+        
+        var i = 0,
+            j = 0,
+            combinedArr = [],
+            heightAvg = 0,
+            highestInCol = [],
+            heightStdDev = 0,
+            hiddenHoles = 0
+        
+        for (i = 0; i < 22; i++) {
+            combinedArr.push(staticArr[i].slice())
+            
+        }
+        
+        
+        for (i = 0; i < 4; i++) {
+            combinedArr[activeArr[i][0]][activeArr[i][1]] = 1
+        }
+        
+        for (i = 0; i < 22; i++) {
+            let fullness = 0
+            for (j = 0; j < 10; j++) {
+                if (combinedArr[i][j]) {
+                    fullness++
+                }
+            }
+            if (fullness == 10) {
+                removeRow(i, combinedArr)
+            }
+        }
+        
+        for (i = 0; i < 10; i++) {
+            highestInCol.push(0)
+        }
+        
+        for (i = 21; i >= 0; i--) {
+            for (j = 0; j < 10; j++) {
+                if (combinedArr[i][j] !== 0) {
+                    highestInCol[j] = 22 - i
+                }
+            }
+        }
+        
+        for (i = 0; i < 10; i++) {
+            heightAvg += highestInCol[i]
+        }
+        
+        heightAvg /= 10
+        
+        
+        for (i = 0; i < 10; i++) {
+            heightStdDev += (heightAvg - highestInCol[i]) * (heightAvg - highestInCol[i])
+        }
+        
+        for (i = 0; i < 22; i++) {
+            for (j = 0; j < 10; j++) {
+                if (combinedArr[i][j] === 0 && highestInCol[j] > 22 - i) {
+                    hiddenHoles++
+                }
+            }
+        }
+        
+        heightStdDev /= 9
+        heightStdDev = Math.sqrt(heightStdDev)
+        
+        return (-heightStdDev) + (-heightAvg / 5) + (-hiddenHoles * 0.2)
     }
     
     var reposBlock = function(row, col, ori, blockType) {
@@ -464,7 +519,7 @@ var learner = (function() {
     
     var findMove = function(board, piece) {
         var i = 0,
-            movesData = {score : 0, moves : []}
+            movesData = {score : -100000, moves : []}
         
         for (i = 0; i < blockShapes[piece[0][2]][0]; i++) { //each orientation
             
@@ -518,7 +573,7 @@ var learner = (function() {
                         let trialDrop = trialPosition,
                             lastTrialDrop = trialPosition,
                             fitnessScore = 0,
-                            k = 0
+                            k = -1
                         
                         while (trialDrop) {
                             k++
@@ -528,6 +583,7 @@ var learner = (function() {
                                 lastTrialDrop = trialDrop
                             } else {
                                 fitnessScore = fitness(lastTrialDrop, board)
+                                
                                 
                                 if (fitnessScore > movesData.score) {
                                     movesData.score = fitnessScore
@@ -553,8 +609,7 @@ var learner = (function() {
         var moveSeq = findMove(staticArr, activeArr),
             i = 0
         
-        
-        console.log(moveSeq.moves)
+        //console.log("Chosen Score: " + moveSeq.score)
         
         for (i = 0; i < moveSeq.moves[0]; i++) {
             activeBlocks.rotateBlock()
@@ -562,10 +617,7 @@ var learner = (function() {
         
         activeBlocks.shiftBlock(moveSeq.moves[1])
         
-        
-        for (i = 0; i < moveSeq.moves[2]; i++) {
-            activeBlocks.processBlock()
-        }
+        activeBlocks.drop()
         
     }
     
@@ -583,3 +635,53 @@ var learner = (function() {
 })()
 
 learner.nextGeneration()
+
+
+
+
+
+
+
+
+
+
+var highestScore = 0
+
+
+var gameFlow = (function() {
+    var gameInProgress = false
+    
+    var nextTick = function() {
+        
+        if (gameInProgress) {
+            learner.figureMove()
+            if (!activeBlocks.processBlock().gameOver) {
+                setTimeout(nextTick, 0)
+            } else {
+                gameInProgress = false
+                $(document).trigger('gameover', [staticBlocks.returnScore()])
+            }
+            
+        }
+    }
+    
+    return {
+        startGame : function() {
+            activeBlocks.newBlock()
+            gameInProgress = true
+            nextTick()
+        }
+    }
+})()
+
+$(document).on('gameover', function(event, score) {
+    console.log("Score is: " + score)
+    if (score > highestScore) {
+        highestScore = score
+    }
+    console.log("Highest Score is: " + highestScore)
+    staticBlocks.resetGame()
+    gameFlow.startGame()
+})
+
+gameFlow.startGame()
