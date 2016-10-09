@@ -343,6 +343,8 @@ var learner = (function() {
         
         $('#gens').append('<li class="gen" id="gen' + currentGen + '"><p>' + currentGen + '</p></li>')
         
+        $('#currgen').html("Current Generation: " + currentGen)
+        
         for (i = 0; i < 10; i++) {
             
             let newCreature = {
@@ -378,3 +380,5 @@ var learner = (function() {
     
     
 })()
+
+learner.nextGeneration()

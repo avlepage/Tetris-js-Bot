@@ -4,12 +4,70 @@ body {
     font-weight: 300;
 }
 
-#genealogy {
-    width: 813px;
+#creaturedata {
+    width: calc(100% - 1235px);
+    min-width: 300px;
     height: 620px;
     background-color: #394455;
     float: left;
-    margin: 0px 0px 0px 10px;
+    margin: 0px 0px 0px 5px;
+    border-radius: 4px;
+    border: 1px solid #FFF;
+    overflow: hidden;
+    position: relative;
+    color: #FFF;
+}
+
+#creaturedata h4 {
+    display: block;
+    font-weight: 300;
+    width: 200px;
+    margin: 5px auto 5px auto;
+    text-align: center;
+    padding: 0px;
+    font-size: 1.5em;
+}
+
+.dataport {
+    list-style: none;
+    width: calc(100% - 20px);
+    padding: 0px;
+    margin: 0px 10px 10px 10px;
+    border-left: 1px solid #FFF;
+    border-top: 1px solid #FFF;
+    overflow-y: scroll;
+    font-weight: 300;
+    border-spacing: 0px;
+}
+
+#creaturedata .label {
+    width: 50%;
+    height: 30px;
+    border-right: 1px solid #FFF;
+    border-bottom: 1px solid #FFF;
+    background-color: #4A5A70;
+}
+
+#creaturedata .value {
+    width: 50%;
+    height: 30px;
+    border-right: 1px solid #FFF;
+    border-bottom: 1px solid #FFF;
+    background-color: #4A5A70;
+}
+
+#creaturedata p {
+    font-weight: 300;
+    margin: 0;
+    padding: 0;
+}
+
+#genealogy {
+    width: 801px;
+    height: 620px;
+    background-color: #394455;
+    float: left;
+    margin: 0px 0px 0px 5px;
     border-radius: 4px;
     border: 1px solid #FFF;
     overflow: hidden;
@@ -45,7 +103,7 @@ body {
 
 #gens {
     list-style: none;
-    width: calc(100% - 32px);
+    width: calc(100% - 20px);
     height: calc(100% - 50px);
     background-color: #4A5A70;
     padding: 0px;
