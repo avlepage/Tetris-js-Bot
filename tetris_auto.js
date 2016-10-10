@@ -441,7 +441,7 @@ var learner = (function() {
         heightStdDev /= 9
         heightStdDev = Math.sqrt(heightStdDev)
         
-        return (-heightStdDev * 2) + (-heightAvg * 20) + (-hiddenHoles * 8)
+        return (-heightStdDev * 4) + (-heightAvg * 20) + (-hiddenHoles * 14)
     }
     
     var reposBlock = function(row, col, ori, blockType) {
