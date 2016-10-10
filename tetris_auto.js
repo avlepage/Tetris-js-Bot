@@ -361,7 +361,7 @@ var learner = (function() {
     var newGen = function() {
         var i = 0,
             currentGen = genData.length + 1,
-            scrolledToBottom = ($('#gens')[0].scrollHeight - $('#gens').scrollTop() - $('#gens').outerHeight() < 1)
+            scrolledToBottom = ($('#gens')[0].scrollHeight - $('#gens').scrollTop() - $('#gens').outerHeight() <= 1)
         
         if (genData.length) { // Generations past 1
             
@@ -395,7 +395,7 @@ var learner = (function() {
             $('#gens').append('<li class="gen" id="gen' + currentGen + '"><p>' + currentGen + '</p></li>')
             
             if (scrolledToBottom) {
-                $('#gens').scrollTop($('#gens').scrollTop() + 50)
+                $('#gens').scrollTop($('#gens').scrollTop() + 51)
             }
         
             $('#currgen').html("Current Generation: " + currentGen)
@@ -405,18 +405,18 @@ var learner = (function() {
                     
                     let newGenome = []
                     
-                    for (k = 0; k < 4; k++) { // For each gene
+                    for (k = 0; k < 6; k++) { // For each gene
                         let randNum = Math.random(),
                             newGene = 0
                         
-                        if (randNum < 0.6) {
+                        if (randNum < 0.7) {
                             newGene = arrCopy[i].genes[k]
                         } else {
                             newGene = arrCopy[j].genes[k]
                         }
                         
-                        if (randNum < 0.06 || randNum > 0.96) {
-                            newGene += (Math.random() - 0.5) / 100
+                        if (randNum < 0.07 || randNum > 0.97) {
+                            newGene += (Math.random() - 0.5) / 20
                         }
                         
                         newGenome.push(newGene)
@@ -466,7 +466,7 @@ var learner = (function() {
                     "parents" : "",
                     "placeInGen" : i,
                     "status" : "untested",
-                    "genes" : [(Math.random() * 2 - 1), (Math.random() * 2 - 1), (Math.random() * 2 - 1), (Math.random() * 2 - 1)] // Max Height, Avg Height, Std Dev Height, Covered Holes
+                    "genes" : [(Math.random() * 2 - 1), (Math.random() * 2 - 1), (Math.random() * 2 - 1), (Math.random() * 2 - 1), (Math.random() * 2 - 1), (Math.random() * 2 - 1)] // Max Height, Avg Height, Std Dev Height, Covered Holes, 3 tile deep holes
                 }
 
                 genData[currentGen - 1].push(newCreature)
@@ -521,6 +521,7 @@ var learner = (function() {
             heightStdDev = 0,
             maxPileHeight = 0,
             hiddenHoles = 0,
+            iOnlyHoles = 0,
             currGen = genData.length - 1
         
         for (i = 0; i < 22; i++) {
@@ -557,18 +558,19 @@ var learner = (function() {
             }
         }
         
-        for (i = 0; i < 10; i++) {
+        for (i = 0; i < 10; i++) { // Mean height
             heightAvg += highestInCol[i]
         }
-        
         heightAvg /= 10
         
         
         for (i = 0; i < 10; i++) {
             heightStdDev += (heightAvg - highestInCol[i]) * (heightAvg - highestInCol[i])
         }
+        heightStdDev /= 9
+        heightStdDev = Math.sqrt(heightStdDev)
         
-        for (i = 0; i < 22; i++) {
+        for (i = 0; i < 22; i++) { // Hidden Holes
             for (j = 0; j < 10; j++) {
                 if (combinedArr[i][j] === 0 && highestInCol[j] > 22 - i) {
                     hiddenHoles++
@@ -576,12 +578,23 @@ var learner = (function() {
             }
         }
         
-        heightStdDev /= 9
-        heightStdDev = Math.sqrt(heightStdDev)
+        if (highestInCol[1] - highestInCol[0] > 2) {
+            iOnlyHoles++
+        }
+        if (highestInCol[8] - highestInCol[9] > 2) {
+            iOnlyHoles++
+        }
+        for (i = 1; i < 9; i++) {
+            if (highestInCol[i - 1] - highestInCol[i] > 2 && highestInCol[i + 1] - highestInCol[i] > 2) {
+                iOnlyHoles++
+            }
+        }
         
-        maxPileHeight = Math.max.apply(null, highestInCol);
         
-        return (maxPileHeight * sigmoid(genData[currGen][currentCreature].genes[0])) + (heightAvg * sigmoid(genData[currGen][currentCreature].genes[1])) + (heightStdDev * sigmoid(genData[currGen][currentCreature].genes[2])) + (hiddenHoles * sigmoid(genData[currGen][currentCreature].genes[3]))
+        
+        maxPileHeight = Math.max.apply(null, highestInCol) // Max pile height
+        
+        return (maxPileHeight * sigmoid(genData[currGen][currentCreature].genes[0])) + (heightAvg * sigmoid(genData[currGen][currentCreature].genes[1])) + (heightStdDev * sigmoid(genData[currGen][currentCreature].genes[2])) + (hiddenHoles * sigmoid(genData[currGen][currentCreature].genes[3])) + (iOnlyHoles * sigmoid(genData[currGen][currentCreature].genes[4])) + (Math.max(iOnlyHoles - 1, 0) * sigmoid(genData[currGen][currentCreature].genes[5]))
     }
     
     var reposBlock = function(row, col, ori, blockType) {
