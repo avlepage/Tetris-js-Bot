@@ -419,6 +419,10 @@ var learner = (function() {
                             newGene += (Math.random() - 0.5) / 20
                         }
                         
+                        if (randNum < 0.007 || randNum > 0.997) {
+                            newGene += (Math.random() - 0.5)
+                        }
+                        
                         newGenome.push(newGene)
                     }
                     
