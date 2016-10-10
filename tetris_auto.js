@@ -598,7 +598,7 @@ var learner = (function() {
         
         maxPileHeight = Math.max.apply(null, highestInCol) // Max pile height
         
-        return -(maxPileHeight * sigmoid(genData[currGen][currentCreature].genes[0])) - (heightAvg * sigmoid(genData[currGen][currentCreature].genes[1])) - (heightStdDev * sigmoid(genData[currGen][currentCreature].genes[2])) - (hiddenHoles * sigmoid(genData[currGen][currentCreature].genes[3])) - (iOnlyHoles * sigmoid(genData[currGen][currentCreature].genes[4])) - (Math.max(iOnlyHoles - 1, 0) * sigmoid(genData[currGen][currentCreature].genes[5]))
+        return -(maxPileHeight * genData[currGen][currentCreature].genes[0]) - (heightAvg * genData[currGen][currentCreature].genes[1]) - (heightStdDev * genData[currGen][currentCreature].genes[2]) - (hiddenHoles * genData[currGen][currentCreature].genes[3]) - (iOnlyHoles * genData[currGen][currentCreature].genes[4]) - (Math.max(iOnlyHoles - 1, 0) * genData[currGen][currentCreature].genes[5])
     }
     
     var reposBlock = function(row, col, ori, blockType) {
