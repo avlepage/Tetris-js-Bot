@@ -315,7 +315,7 @@ var learner = (function() {
     var genData = [],
         blockShapes = { // Rotation 0, 1, 2, 3
             't' : [4, [0, -1], [-1, 0],  [0, 1]],
-            'i' : [2, [1, 0],  [2, 0],   [-1, 0]],
+            'i' : [2, [0, 1],  [0, 2],   [0, -1]],
             's' : [2, [0, -1],  [-1, 0],  [-1, 1]],
             'z' : [2, [0, 1], [-1, 0],  [-1, -1]],
             'o' : [1, [0, -1], [-1, -1], [-1, 0]],
@@ -415,7 +415,7 @@ var learner = (function() {
                             newGene = arrCopy[j].genes[k]
                         }
                         
-                        if (randNum < 0.05 || randNum > 0.95) {
+                        if (randNum < 0.2 || randNum > 0.8) {
                             newGene *= 1 + (Math.random() - 0.5) / 20
                         }
                         
