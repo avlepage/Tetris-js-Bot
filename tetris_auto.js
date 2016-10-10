@@ -321,44 +321,180 @@ var learner = (function() {
             'o' : [1, [0, -1], [-1, -1], [-1, 0]],
             'l' : [4, [0, 1],  [0, -1],  [-1, 1]],
             'j' : [4, [0, 1],  [0, -1],  [-1, -1]]
+        },
+        currentCreature = 0
+    
+    $(document).on('gameover', function(event, score) {
+        
+        console.log(genData[genData.length - 1][currentCreature].genes)
+        //console.log("Score is: " + score)
+        if (score > highestScore) {
+            highestScore = score
         }
+        //console.log("Highest Score is: " + highestScore)
+        
+        
+        var currGen = genData.length
+        
+        $('#g' + genData.length + 'c' + currentCreature).removeClass("c_testing")
+        $('#g' + genData.length + 'c' + currentCreature).addClass("c_tested")
+        $('#g' + genData.length + 'c' + currentCreature + ' .creaturescore').html(score)
+        genData[currGen - 1][currentCreature].score = score
+        
+        if (currentCreature !== 9) {
+            $('#g' + genData.length + 'c' + (currentCreature + 1)).removeClass("c_untested")
+            $('#g' + genData.length + 'c' + (currentCreature + 1)).addClass("c_testing")
+            currentCreature++
+        } else {
+            newGen()
+        }
+        
+        staticBlocks.resetGame()
+        gameFlow.startGame()
+    })
+    
+    var sigmoid = function(n) {
+        return (2/(1+Math.pow(Math.E, -n))) - 1
+    }
     
     
     var newGen = function() {
         var i = 0,
-            currentGen = genData.length + 1
+            currentGen = genData.length + 1,
+            scrolledToBottom = ($('#gens')[0].scrollHeight - $('#gens').scrollTop() - $('#gens').outerHeight() < 1)
         
-        genData.push([])
-        
-        $('#gens').append('<li class="gen" id="gen' + currentGen + '"><p>' + currentGen + '</p></li>')
-        
-        $('#currgen').html("Current Generation: " + currentGen)
-        
-        for (i = 0; i < 10; i++) {
+        if (genData.length) { // Generations past 1
             
-            let newCreature = {
-                "name" : chance.first(),
-                "score" : -1,
-                "parent" : "",
-                "placeInGen" : i
+            var arrCopy = genData[genData.length - 1].slice(),
+                j = 0,
+                k = 0,
+                l = 0
+            
+            arrCopy.sort(function(a,b) {return b.score - a.score})
+            
+            console.log("Prev Gen Median: " + (arrCopy[4].score + (arrCopy[5].score - arrCopy[4].score) / 2))
+            
+            $('#g' + genData.length + 'c' + arrCopy[0].placeInGen).removeClass("c_tested")
+            $('#g' + genData.length + 'c' + arrCopy[0].placeInGen).addClass("c_best")
+            arrCopy[0].status = "Reproduced"
+            
+            for (i = 1; i < 5; i++) {
+                $('#g' + genData.length + 'c' + arrCopy[i].placeInGen).removeClass("c_tested")
+                $('#g' + genData.length + 'c' + arrCopy[i].placeInGen).addClass("c_survived")
+                arrCopy[i].status = "Reproduced"
             }
             
-            genData[currentGen - 1].push(newCreature)
+            for (i = 5; i < 10; i++) {
+                $('#g' + genData.length + 'c' + arrCopy[i].placeInGen).removeClass("c_tested")
+                $('#g' + genData.length + 'c' + arrCopy[i].placeInGen).addClass("c_killed")
+                arrCopy[i].status = "Killed"
+            }
             
-            $('#gen' + currentGen).append(
-                '<div class="creature" id="g'
-                + currentGen
-                + 'c'
-                + i 
-                + '"><p class="creaturenumber">C'
-                + i
-                + '</p><p class="creaturescore">0</p><p class="creaturename">'
-                + newCreature.name
-                + '</p></div>'
+            genData.push([])
             
-            )
+            $('#gens').append('<li class="gen" id="gen' + currentGen + '"><p>' + currentGen + '</p></li>')
+            
+            if (scrolledToBottom) {
+                $('#gens').scrollTop($('#gens').scrollTop() + 50)
+            }
+        
+            $('#currgen').html("Current Generation: " + currentGen)
+            
+            for (i = 0; i < 4; i++) {
+                for (j = i + 1; j < 5; j++) { // Reproduce new creatures
+                    
+                    let newGenome = []
+                    
+                    for (k = 0; k < 4; k++) { // For each gene
+                        let randNum = Math.random(),
+                            newGene = 0
+                        
+                        if (randNum < 0.6) {
+                            newGene = arrCopy[i].genes[k]
+                        } else {
+                            newGene = arrCopy[j].genes[k]
+                        }
+                        
+                        if (randNum < 0.06 || randNum > 0.96) {
+                            newGene += (Math.random() - 0.5) / 100
+                        }
+                        
+                        newGenome.push(newGene)
+                    }
+                    
+                    
+                    
+                    let newCreature = {
+                        "name" : chance.first(),
+                        "score" : -1,
+                        "parents" : "g" + (currentGen - 1) + "c" + arrCopy[i].placeInGen + ", " + "g" + (currentGen - 1) + "c" + arrCopy[j].placeInGen,
+                        "placeInGen" : l,
+                        "status" : "untested",
+                        "genes" : newGenome // Max Height, Avg Height, Std Dev Height, Covered Holes
+                    }
+                    
+                    genData[currentGen - 1].push(newCreature)
+            
+                    $('#gen' + currentGen).append(
+                        '<div class="creature c_untested" id="g'
+                        + currentGen
+                        + 'c'
+                        + l 
+                        + '"><p class="creaturenumber">C'
+                        + l
+                        + '</p><p class="creaturescore">0</p><p class="creaturename">'
+                        + newCreature.name
+                        + '</p></div>'
+
+                    )
+                    l++
+                }
+            }
+            
+            
+        } else { // The first generation
+            genData.push([])
+            $('#gens').append('<li class="gen" id="gen' + currentGen + '"><p>' + currentGen + '</p></li>')
+        
+            $('#currgen').html("Current Generation: " + currentGen)
+            
+            for (i = 0; i < 10; i++) {
+            
+                let newCreature = {
+                    "name" : chance.first(),
+                    "score" : -1,
+                    "parents" : "",
+                    "placeInGen" : i,
+                    "status" : "untested",
+                    "genes" : [(Math.random() * 2 - 1), (Math.random() * 2 - 1), (Math.random() * 2 - 1), (Math.random() * 2 - 1)] // Max Height, Avg Height, Std Dev Height, Covered Holes
+                }
+
+                genData[currentGen - 1].push(newCreature)
+
+                $('#gen' + currentGen).append(
+                    '<div class="creature c_untested" id="g'
+                    + currentGen
+                    + 'c'
+                    + i 
+                    + '"><p class="creaturenumber">C'
+                    + i
+                    + '</p><p class="creaturescore">0</p><p class="creaturename">'
+                    + newCreature.name
+                    + '</p></div>'
+
+                )
+            }
         }
+
+        currentCreature = 0
+        
+        
+        
+        $('#g' + genData.length + 'c0').addClass("c_testing")
+        $('#g' + genData.length + 'c0').removeClass("c_untested")
     }
+    
+    
     
     var removeRow = function(row, grid) {
         var i = 0,
@@ -383,7 +519,9 @@ var learner = (function() {
             heightAvg = 0,
             highestInCol = [],
             heightStdDev = 0,
-            hiddenHoles = 0
+            maxPileHeight = 0,
+            hiddenHoles = 0,
+            currGen = genData.length - 1
         
         for (i = 0; i < 22; i++) {
             combinedArr.push(staticArr[i].slice())
@@ -441,7 +579,9 @@ var learner = (function() {
         heightStdDev /= 9
         heightStdDev = Math.sqrt(heightStdDev)
         
-        return (-heightStdDev * 4) + (-heightAvg * 20) + (-hiddenHoles * 14)
+        maxPileHeight = Math.max.apply(null, highestInCol);
+        
+        return (maxPileHeight * sigmoid(genData[currGen][currentCreature].genes[0])) + (heightAvg * sigmoid(genData[currGen][currentCreature].genes[1])) + (heightStdDev * sigmoid(genData[currGen][currentCreature].genes[2])) + (hiddenHoles * sigmoid(genData[currGen][currentCreature].genes[3]))
     }
     
     var reposBlock = function(row, col, ori, blockType) {
@@ -638,6 +778,33 @@ learner.nextGeneration()
 
 
 
+/*
+
+.c_untested {
+    background-color: #CCC;
+}
+
+.c_testing {
+    background-color: #FC0;
+}
+
+.c_tested {
+    background-color: #FF0;
+}
+
+.c_killed {
+    background-color: #E88;
+}
+
+.c_survived {
+    background-color: #BEB;
+}
+
+.c_best {
+    background-color: #5E5;
+}
+
+*/
 
 
 
@@ -656,7 +823,7 @@ var gameFlow = (function() {
         if (gameInProgress) {
             learner.figureMove()
             if (!activeBlocks.processBlock().gameOver) {
-                setTimeout(nextTick, 0)
+                setTimeout(nextTick, 000)
             } else {
                 gameInProgress = false
                 $(document).trigger('gameover', [staticBlocks.returnScore()])
@@ -674,6 +841,8 @@ var gameFlow = (function() {
     }
 })()
 
+/*
+
 $(document).on('gameover', function(event, score) {
     console.log("Score is: " + score)
     if (score > highestScore) {
@@ -683,5 +852,8 @@ $(document).on('gameover', function(event, score) {
     staticBlocks.resetGame()
     gameFlow.startGame()
 })
-
+*/
 gameFlow.startGame()
+
+
+

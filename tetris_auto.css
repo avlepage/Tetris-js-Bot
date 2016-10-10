@@ -173,11 +173,34 @@ body {
     float: left;
     height: 50px;
     width: 69px;
-    background-color: #BEB;
     margin: 0px;
     padding: 0px;
     border-right: 1px solid #AAA;
     overflow: hidden;
+}
+
+.c_untested {
+    background-color: #CCC;
+}
+
+.c_testing {
+    background-color: #FC0;
+}
+
+.c_tested {
+    background-color: #FF0;
+}
+
+.c_killed {
+    background-color: #E88;
+}
+
+.c_survived {
+    background-color: #BEB;
+}
+
+.c_best {
+    background-color: #5E5;
 }
 
 .creature p {
