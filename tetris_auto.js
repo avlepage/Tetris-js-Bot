@@ -148,7 +148,7 @@ var activeBlocks = (function() {
         actBlockArr = [], //First block is the middle one
         blockShapes = { // Rotation 0, 1, 2, 3
             't' : [4, [0, -1], [-1, 0],  [0, 1]],
-            'i' : [2, [1, 0],  [2, 0],   [-1, 0]],
+            'i' : [2, [0, 1],  [0, 2],   [0, -1]],
             's' : [2, [0, -1],  [-1, 0],  [-1, 1]],
             'z' : [2, [0, 1], [-1, 0],  [-1, -1]],
             'o' : [1, [0, -1], [-1, -1], [-1, 0]],
@@ -409,17 +409,17 @@ var learner = (function() {
                         let randNum = Math.random(),
                             newGene = 0
                         
-                        if (randNum < 0.7) {
+                        if (randNum < 0.5) {
                             newGene = arrCopy[i].genes[k]
                         } else {
                             newGene = arrCopy[j].genes[k]
                         }
                         
-                        if (randNum < 0.07 || randNum > 0.97) {
+                        if (randNum < 0.05 || randNum > 0.95) {
                             newGene *= 1 + (Math.random() - 0.5) / 20
                         }
                         
-                        if (randNum < 0.007 || randNum > 0.997) {
+                        if (randNum < 0.005 || randNum > 0.995) {
                             newGene *= (Math.random() + 0.5)
                         }
                         
