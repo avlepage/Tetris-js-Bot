@@ -416,11 +416,11 @@ var learner = (function() {
                         }
                         
                         if (randNum < 0.07 || randNum > 0.97) {
-                            newGene += (Math.random() - 0.5) / 20
+                            newGene *= 1 + (Math.random() - 0.5) / 20
                         }
                         
                         if (randNum < 0.007 || randNum > 0.997) {
-                            newGene += (Math.random() - 0.5)
+                            newGene *= (Math.random() + 0.5)
                         }
                         
                         newGenome.push(newGene)
@@ -470,7 +470,7 @@ var learner = (function() {
                     "parents" : "",
                     "placeInGen" : i,
                     "status" : "untested",
-                    "genes" : [(Math.random() * 2 - 1), (Math.random() * 2 - 1), (Math.random() * 2 - 1), (Math.random() * 2 - 1), (Math.random() * 2 - 1), (Math.random() * 2 - 1)] // Max Height, Avg Height, Std Dev Height, Covered Holes, 3 tile deep holes
+                    "genes" : [Math.random(), Math.random(), Math.random(), Math.random(), Math.random(), Math.random()] // Max Height, Avg Height, Std Dev Height, Covered Holes, 3 tile deep holes
                 }
 
                 genData[currentGen - 1].push(newCreature)
@@ -598,7 +598,7 @@ var learner = (function() {
         
         maxPileHeight = Math.max.apply(null, highestInCol) // Max pile height
         
-        return (maxPileHeight * sigmoid(genData[currGen][currentCreature].genes[0])) + (heightAvg * sigmoid(genData[currGen][currentCreature].genes[1])) + (heightStdDev * sigmoid(genData[currGen][currentCreature].genes[2])) + (hiddenHoles * sigmoid(genData[currGen][currentCreature].genes[3])) + (iOnlyHoles * sigmoid(genData[currGen][currentCreature].genes[4])) + (Math.max(iOnlyHoles - 1, 0) * sigmoid(genData[currGen][currentCreature].genes[5]))
+        return -(maxPileHeight * sigmoid(genData[currGen][currentCreature].genes[0])) - (heightAvg * sigmoid(genData[currGen][currentCreature].genes[1])) - (heightStdDev * sigmoid(genData[currGen][currentCreature].genes[2])) - (hiddenHoles * sigmoid(genData[currGen][currentCreature].genes[3])) - (iOnlyHoles * sigmoid(genData[currGen][currentCreature].genes[4])) - (Math.max(iOnlyHoles - 1, 0) * sigmoid(genData[currGen][currentCreature].genes[5]))
     }
     
     var reposBlock = function(row, col, ori, blockType) {
