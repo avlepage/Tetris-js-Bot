@@ -441,7 +441,7 @@ var learner = (function() {
         heightStdDev /= 9
         heightStdDev = Math.sqrt(heightStdDev)
         
-        return (-heightStdDev) + (-heightAvg / 5) + (-hiddenHoles * 0.2)
+        return (-heightStdDev * 2) + (-heightAvg * 20) + (-hiddenHoles * 8)
     }
     
     var reposBlock = function(row, col, ori, blockType) {
@@ -532,7 +532,7 @@ var learner = (function() {
                     j = 0
                 
                 while (trialPosition) { // Try moving left
-                    j--
+                    
                     trialPosition = shiftBlock(j, trialOrientation, board, i)
                     
                     if (trialPosition) { // if move j blocks left is valid
@@ -559,7 +559,7 @@ var learner = (function() {
                             
                         }
                     }
-                    
+                    j--
                 }
                 
                 trialPosition = []
