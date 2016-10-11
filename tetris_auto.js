@@ -2,6 +2,63 @@
 
 
 
+// Chart
+
+google.charts.load('current', {'packages':['line']});
+google.charts.setOnLoadCallback(drawChart);
+
+var chartData = [[0, 0, 0, 0]]
+
+function drawChart() {
+    var data = new google.visualization.DataTable()
+    
+    data.addColumn('number', 'Generation')
+    data.addColumn('number', 'Maximum')
+    data.addColumn('number', 'Median')
+    data.addColumn('number', 'Minimum')
+    
+    data.addRows(chartData)
+    
+    
+    var options = {
+        //chartArea: {backgroundColor: {fill: "#394455"}},
+        backgroundColor: "#394455",
+        fontName: "Ubuntu",
+        chartArea: {
+            backgroundColor: "#4A5A70"
+        },
+        legend: {
+            textStyle: {
+                color: "white"
+            }
+        },
+        hAxis: {
+            minValue: 0,
+            textStyle: {
+                color: "white",
+            },
+            titleTextStyle: {
+                fontSize: 0
+            }
+        },
+        vAxis: {
+            minValue: 0,
+            textStyle: {
+                color: "white"
+            }
+        }
+    };
+
+    var chart = new google.charts.Line(document.getElementById('progresschart'));
+
+    //chart.draw(data, options);
+    chart.draw(data, google.charts.Line.convertOptions(options))
+}
+
+
+
+
+
 // Gameboard setup
 (function() {
     var i = 0,
@@ -368,11 +425,12 @@ var learner = (function() {
             var arrCopy = genData[genData.length - 1].slice(),
                 j = 0,
                 k = 0,
-                l = 0
+                l = 0,
+                prevGenMedian = 0
             
             arrCopy.sort(function(a,b) {return b.score - a.score})
             
-            console.log("Prev Gen Median: " + (arrCopy[4].score + (arrCopy[5].score - arrCopy[4].score) / 2))
+            
             
             $('#g' + genData.length + 'c' + arrCopy[0].placeInGen).removeClass("c_tested")
             $('#g' + genData.length + 'c' + arrCopy[0].placeInGen).addClass("c_best")
@@ -456,6 +514,17 @@ var learner = (function() {
             }
             
             
+            prevGenMedian = (arrCopy[4].score + (arrCopy[5].score - arrCopy[4].score) / 2)
+            
+            console.log("Prev Gen Median: " + prevGenMedian)
+            
+            $('#g' + (currentGen - 1) + "m .creaturescore").html(prevGenMedian)
+            
+            chartData.push([currentGen - 1, arrCopy[9].score, prevGenMedian, arrCopy[0].score])
+            
+            drawChart()
+            
+            
         } else { // The first generation
             genData.push([])
             $('#gens').append('<li class="gen" id="gen' + currentGen + '"><p>' + currentGen + '</p></li>')
@@ -489,6 +558,12 @@ var learner = (function() {
                 )
             }
         }
+        
+        $('#gen' + currentGen).append(
+                        '<div class="creature c_median" id="g'
+                        + currentGen
+                        + 'm"><p class="creaturenumber">Gen Median:</p><p class="creaturescore">0</p></div>'
+                    )
 
         currentCreature = 0
         
@@ -871,6 +946,8 @@ $(document).on('gameover', function(event, score) {
 })
 */
 gameFlow.startGame()
+
+
 
 
 

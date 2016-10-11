@@ -1,8 +1,37 @@
+html {
+    height: 100%;
+}
+
 body {
     font-family: "Ubuntu";
     background-color: #1C2733;
     font-weight: 300;
-    margin: 0px
+    margin: 0px;
+    height: 100%;
+}
+
+#progresschartwrapper {
+    min-width: 1185px;
+    width: calc(100% - 438px);
+    min-height: 250px;
+    height: calc(100% - 596px);
+    background-color: #394455;
+    float: left;
+    margin: 5px 0px 0px 5px;
+    border-radius: 4px;
+    border: 1px solid #FFF;
+    overflow: hidden;
+    position: relative;
+    color: #FFF;
+}
+
+#progresschart {
+    width: calc(100% - 20px);
+    height: calc(100% - 20px);
+    background-color: #4A5A70;
+    padding: 0px;
+    margin: 10px 10px 10px 10px;
+    border-radius: 4px;
 }
 
 #topbar {
@@ -38,9 +67,9 @@ body {
 }
 
 #creaturedata {
-    width: calc(100% - 1245px);
-    min-width: 300px;
-    height: 620px;
+    min-width: 307px;
+    width: calc(100% - 1316px);
+    height: 507px;
     background-color: #394455;
     float: left;
     margin: 0px 0px 0px 5px;
@@ -95,9 +124,41 @@ body {
     padding: 0;
 }
 
+#familyparentslabel {
+    width: 140px;
+    height: 30px;
+    border-right: 1px solid #FFF;
+    border-bottom: 1px solid #FFF;
+    background-color: #4A5A70;
+}
+
+#familychildrenlabel {
+    width: 140px;
+    height: 30px;
+    border-right: 1px solid #FFF;
+    border-bottom: 1px solid #FFF;
+    background-color: #4A5A70;
+}
+
+#familyparentids {
+    height: 51px;
+    border-right: 1px solid #FFF;
+    border-bottom: 1px solid #FFF;
+    background-color: #4A5A70;
+    color: #000;
+}
+#familychildrenids {
+    height: 102px;
+    border-right: 1px solid #FFF;
+    border-bottom: 1px solid #FFF;
+    background-color: #4A5A70;
+    color: #000;
+}
+
+
 #genealogy {
-    width: 801px;
-    height: 620px;
+    width: 871px;
+    height: 507px;
     background-color: #394455;
     float: left;
     margin: 0px 0px 0px 5px;

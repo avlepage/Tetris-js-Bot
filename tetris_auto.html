@@ -16,14 +16,13 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     
     <script src="chance.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     
 </head>
     
     
 <body>
     <div id="topbar"><p>ACTAR.IO</p></div>
-    
-    <div id="container">
     
         <div id="gamearea">
             <table id="gameboard">
@@ -122,26 +121,38 @@
             </table>
             
             <table class="dataport">
-                <tr id="parent">
-                    <th class="label">
-                        <p>Parent:</p>
+                <tr id="familylabels">
+                    <th id="familyparentslabel">
+                        <p>Parents:</p>
                     </th>
-                    <th class="value">
-                    </th>
-                </tr>
-                <tr id="children">
-                    <th class="label">
+                    <th id="familychildrenlabel">
                         <p>Children:</p>
                     </th>
-                    <th class="value">
+                </tr>
+                <tr id="familyids">
+                    <th id="familyparentids">
+                        <div class="creature c_tested" id="g1c1"><p class="creaturenumber">C1</p><p class="creaturescore">4900</p><p class="creaturename">Alie</p></div>
+                        <div class="creature c_tested" id="g1c1"><p class="creaturenumber">C1</p><p class="creaturescore">4900</p><p class="creaturename">Alie</p></div>
+                    </th>
+                    <th id="familychildrenids">
+        
+                        <div class="creature c_tested" id="g1c1"><p class="creaturenumber">C1</p><p class="creaturescore">4900</p><p class="creaturename">Alie</p></div>
+                        <div class="creature c_tested" id="g1c1"><p class="creaturenumber">C1</p><p class="creaturescore">4900</p><p class="creaturename">Alie</p></div>
+                        <div class="creature c_tested" id="g1c1"><p class="creaturenumber">C1</p><p class="creaturescore">4900</p><p class="creaturename">Alie</p></div>
+                        <div class="creature c_tested" id="g1c1"><p class="creaturenumber">C1</p><p class="creaturescore">4900</p><p class="creaturename">Alie</p></div>
                     </th>
                 </tr>
             </table>
             
         </div>
         
+        <div id="progresschartwrapper">
+            <div id="progresschart">
+            
+            </div>
+        </div>
         
-    </div>
+        
     <div id="lowbar"><p>© 2016 - Will Clark</p></div>
     <script src="tetris_auto.js"></script>
 </body>
