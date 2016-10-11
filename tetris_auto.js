@@ -367,7 +367,7 @@ $(document).keydown(function(key) {
 
 
 
-
+var errCont = 0
 
 
 
@@ -391,7 +391,7 @@ var learner = (function() {
     
     $(document).on('gameover', function(event, score) {
         
-        console.log(genData[genData.length - 1][currentCreature].genes)
+        console.log("C" + currentCreature + ": " + genData[genData.length - 1][currentCreature].genes)
         //console.log("Score is: " + score)
         if (score > highestScore) {
             highestScore = score
@@ -427,6 +427,8 @@ var learner = (function() {
         var i = 0,
             currentGen = genData.length + 1,
             scrolledToBottom = ($('#gens')[0].scrollHeight - $('#gens').scrollTop() - $('#gens').outerHeight() <= 1)
+        
+        console.log("Generation: " + currentGen)
         
         if (genData.length) { // Generations past 1
             
@@ -523,8 +525,7 @@ var learner = (function() {
             
             
             prevGenMedian = (arrCopy[4].score + (arrCopy[5].score - arrCopy[4].score) / 2)
-            
-            console.log("Prev Gen Median: " + prevGenMedian)
+
             
             $('#g' + (currentGen - 1) + "m .creaturescore").html(prevGenMedian)
             
@@ -677,27 +678,16 @@ var learner = (function() {
             }
         }
         
+//        console.log("Avg height: " + heightAvg)
+//        console.log("Std dev h: " + heightStdDev)
+//        console.log("Holes: " + hiddenHoles)
+//        console.log(combinedArr)
         
         
         maxPileHeight = Math.max.apply(null, highestInCol) // Max pile height
         
         return -(maxPileHeight * genData[currGen][currentCreature].genes[0]) - (heightAvg * genData[currGen][currentCreature].genes[1]) - (heightStdDev * genData[currGen][currentCreature].genes[2]) - (hiddenHoles * genData[currGen][currentCreature].genes[3]) - (iOnlyHoles * genData[currGen][currentCreature].genes[4]) - (Math.max(iOnlyHoles - 1, 0) * genData[currGen][currentCreature].genes[5])
     }
-    
-    var reposBlock = function(row, col, ori, blockType) {
-            var rev = ori % 2,
-                invRev = (1 + rev) % 2,
-                rowRev = (ori < 2) ? 1 : -1,
-                colRev = (ori === 0 || ori === 3) ? 1 : -1,
-                output = [[row, col, blockType]],
-                i = 0
-            
-            for (i = 1; i < 4; i++) {
-                output.push([row + (blockShapes[blockType][i][rev] * rowRev), col + (blockShapes[blockType][i][invRev] * colRev), blockType])
-            }
-            
-            return output
-        }
     
     var rotateBlock = function(trialOrientation, activeArr, staticArr){
         var trialNewPos = reposBlock(activeArr[0][0], activeArr[0][1], trialOrientation, activeArr[0][2]),
@@ -739,7 +729,7 @@ var learner = (function() {
         return false
     }
     
-    var processBlock = function(activeArr, staticArr, blockOrientation) { // Returns true if block is placed
+    var processBlock = function(activeArr, staticArr, blockOrientation) { // Returns false if block is placed
             var i = 0,
                 atBottom = false
             
@@ -757,9 +747,146 @@ var learner = (function() {
 
         }
     
-    var findMove = function(board, piece) {
+    var reposBlock = function(row, col, ori, blockType) {
+            var rev = ori % 2,
+                invRev = (1 + rev) % 2,
+                rowRev = (ori < 2) ? 1 : -1,
+                colRev = (ori === 0 || ori === 3) ? 1 : -1,
+                output = [[row, col, blockType]],
+                i = 0
+            
+            for (i = 1; i < 4; i++) {
+                output.push([row + (blockShapes[blockType][i][rev] * rowRev), col + (blockShapes[blockType][i][invRev] * colRev), blockType])
+            }
+            
+            return output
+        }
+    
+    var validMove = function(activeArr, staticArr) {
+        var isValid = true,
+            i = 0
+        
+        
+        for (i = 0; i < 4; i++) {
+//            console.log(i)
+//            console.log(staticArr)
+//            console.log(activeArr)
+            
+            if (activeArr[i][0] > 21 || activeArr[i][1] < 0 || activeArr[i][1] > 9 || staticArr[activeArr[i][0]][activeArr[i][1]] !== 0) {
+                isValid = false
+            }
+        }
+        return isValid
+    }
+    
+    //reposBlock(activeArr[0][0], activeArr[0][1] + dir, blockOrientation, activeArr[0][2])
+    //allowedMoves = {left: true, right: true, rotate: 0}
+    
+    var iterateMove = function(activeArr, staticArr, blockOrientation, allowedMoves, movesSoFar, movesData) {  // Recursive function that finds all possible moves
+        var activeCopy = [],
+            allowedCopy = {},
+            movesSoFarCopy = [],
+            i = 0,
+            droppedBlock = [],
+            prevMove = ''
+        
+        if (!validMove(activeArr, staticArr)) {
+            return false
+        }
+        
+        if (movesSoFar.length) {
+            prevMove = movesSoFar[movesSoFar.length - 1]
+        }
+
+        if (allowedMoves.rotate + 1 < blockShapes[activeArr[0][2]][0] && (prevMove !== 'l') && (prevMove !== 'r') && (prevMove !== 'd')) {
+            
+            allowedCopy = {left : allowedMoves.left, right : allowedMoves.right, rotate: allowedMoves.rotate + 1}
+            
+            activeCopy = reposBlock(activeArr[0][0], activeArr[0][1], blockOrientation + 1, activeArr[0][2])
+            
+            movesSoFarCopy = movesSoFar.slice()
+            
+            movesSoFarCopy.push('o')
+            
+            iterateMove(activeCopy, staticArr, blockOrientation + 1, allowedCopy, movesSoFarCopy, movesData)
+        }
+        
+        
+        if (allowedMoves.left && (prevMove !== 'r')) {
+            
+            allowedCopy = {left : true, right : false, rotate: allowedMoves.rotate}
+            
+            activeCopy = reposBlock(activeArr[0][0], activeArr[0][1] - 1, blockOrientation, activeArr[0][2])
+            
+            movesSoFarCopy = movesSoFar.slice()
+            
+            movesSoFarCopy.push('l')
+            
+            iterateMove(activeCopy, staticArr, blockOrientation, allowedCopy, movesSoFarCopy, movesData)
+        }
+        
+        if (allowedMoves.right && (prevMove !== 'l')) {
+            
+            allowedCopy = {left : false, right : true, rotate: allowedMoves.rotate}
+            
+            activeCopy = reposBlock(activeArr[0][0], activeArr[0][1] + 1, blockOrientation, activeArr[0][2])
+            
+            movesSoFarCopy = movesSoFar.slice()
+            
+            movesSoFarCopy.push('r')
+            
+            iterateMove(activeCopy, staticArr, blockOrientation, allowedCopy, movesSoFarCopy, movesData)
+        }
+        
+        droppedBlock = processBlock(activeArr, staticArr, blockOrientation)
+        
+        if (droppedBlock) {
+            
+            let dropDist = 1,
+                prevDroppedBlock = droppedBlock
+            
+            allowedCopy = {left : allowedMoves.left, right : allowedMoves.right, rotate: allowedMoves.rotate}
+            
+            movesSoFarCopy = movesSoFar.slice()
+            
+            while (droppedBlock) {
+                prevDroppedBlock = droppedBlock
+                droppedBlock = processBlock(droppedBlock, staticArr, blockOrientation)
+                movesSoFarCopy.push('d')
+            }
+            
+            movesSoFarCopy.pop()
+            movesSoFarCopy.pop()
+            
+            iterateMove(prevDroppedBlock, staticArr, blockOrientation, allowedCopy, movesSoFarCopy, movesData)
+        } else {
+            let fitnessScore = fitness(activeArr, staticArr)
+            
+//            console.log(blockOrientation)
+//            
+//            console.log("Move fitness:  " + fitnessScore)
+//            console.log("Move Sequence: " + movesSoFar)
+//            console.log("")
+            
+            if (fitnessScore > movesData.score) {
+                movesData.score = fitnessScore
+                movesData.moves = movesSoFar
+            }
+            
+            
+        }
+        
+    }
+    
+    var findMove = function(staticArr, activeArr) {
         var i = 0,
             movesData = {score : -100000, moves : []}
+        
+        iterateMove(activeArr, staticArr, 0, {left: true, right: true, rotate: 0}, [], movesData)
+        
+        //console.log(movesData.moves)
+        
+        /*
         
         for (i = 0; i < blockShapes[piece[0][2]][0]; i++) { //each orientation
             
@@ -842,20 +969,62 @@ var learner = (function() {
             }
             
         }
+        */
         return movesData
     }
     
+    var doNextMove = function(moveSeq) {
+        nextMove = moveSeq.shift()
+        //console.log(moveSeq.length)
+        
+        switch (nextMove) {
+                case "l":
+                    activeBlocks.shiftBlock(-1)
+                    break
+                case "r":
+                    activeBlocks.shiftBlock(1)
+                    break
+                case "o":
+                    activeBlocks.rotateBlock()
+                    break
+                default:
+                    activeBlocks.processBlock()
+            }
+        
+        
+        
+        if (moveSeq.length) {
+            setTimeout(doNextMove.bind(null, moveSeq), 00)
+        }
+        
+    }
+    
     var doMove = function(activeArr, staticArr) {
-        var moveSeq = findMove(staticArr, activeArr),
-            i = 0
+        var moveSeq = findMove(staticArr, activeArr)
+        
+        //doNextMove(moveSeq.moves)
+
         
         //console.log("Chosen Score: " + moveSeq.score)
         
-        for (i = 0; i < moveSeq.moves[0]; i++) {
-            activeBlocks.rotateBlock()
+        while (moveSeq.moves.length) {
+            nextMove = moveSeq.moves.shift()
+            
+            switch (nextMove) {
+                case "l":
+                    activeBlocks.shiftBlock(-1)
+                    break
+                case "r":
+                    activeBlocks.shiftBlock(1)
+                    break
+                case "o":
+                    activeBlocks.rotateBlock()
+                    break
+                default:
+                    activeBlocks.processBlock()
+            }
+            
         }
-        
-        activeBlocks.shiftBlock(moveSeq.moves[1])
         
         activeBlocks.drop()
         
@@ -923,7 +1092,7 @@ var gameFlow = (function() {
         if (gameInProgress) {
             learner.figureMove()
             if (!activeBlocks.processBlock().gameOver) {
-                setTimeout(nextTick, 000)
+                setTimeout(nextTick, 00000)
             } else {
                 gameInProgress = false
                 $(document).trigger('gameover', [staticBlocks.returnScore()])
