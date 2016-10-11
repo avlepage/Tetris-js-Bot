@@ -520,7 +520,7 @@ var learner = (function() {
             
             $('#g' + (currentGen - 1) + "m .creaturescore").html(prevGenMedian)
             
-            chartData.push([currentGen - 1, arrCopy[9].score, prevGenMedian, arrCopy[0].score])
+            chartData.push([currentGen - 1, arrCopy[0].score, prevGenMedian, arrCopy[9].score])
             
             drawChart()
             
