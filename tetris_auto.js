@@ -201,7 +201,8 @@ var staticBlocks = (function() {
 var activeBlocks = (function() {
     var blockType = "",
         blockOrientation = 0,
-        nextBlockType = "",
+        nextBlockType = '',
+        nextBlockQueue = [],
         actBlockArr = [], //First block is the middle one
         blockShapes = { // Rotation 0, 1, 2, 3
             't' : [4, [0, -1], [-1, 0],  [0, 1]],
@@ -234,7 +235,14 @@ var activeBlocks = (function() {
         },
         genNextBlock = function() {
             var blockTypes = ['t', 'i', 's', 'z', 'o', 'l', 'j']
-            nextBlockType = blockTypes[Math.floor(Math.random() * 7)]
+            
+            if (!nextBlockQueue.length) {
+                nextBlockQueue = blockTypes.slice()
+                nextBlockQueue.sort(function(){return (Math.random() - 0.5)})
+            }
+            nextBlockType = nextBlockQueue.pop()
+            
+            //nextBlockType = blockTypes[Math.floor(Math.random() * 7)]
             $("#nextpiecearea").css('background-image', "url(images/block_icon_" + nextBlockType + ".png)")
         }
     
