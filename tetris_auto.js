@@ -283,7 +283,7 @@ var activeBlocks = (function() {
             if (freeSpace === 4) {
                 actBlockArr = trialNewPos
                 blockOrientation = trialBlockOrientation
-                colourActive()
+                //colourActive()
                 return
             }
             
@@ -322,7 +322,7 @@ var activeBlocks = (function() {
             
             if (moveIsAllowed) {
                 actBlockArr = trialNewPos
-                colourActive()
+                //colourActive()
             }
         },
         getActiveArr : function() {
