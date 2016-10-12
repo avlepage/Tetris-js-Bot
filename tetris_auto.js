@@ -387,19 +387,59 @@ var learner = (function() {
             'l' : [4, [0, 1],  [0, -1],  [-1, 1]],
             'j' : [4, [0, 1],  [0, -1],  [-1, -1]]
         },
-        currentCreature = 0
+        currentCreature = 0,
+        displayCurrentCreature = true
+    
+    var updateInfoBar = function(g, c) {
+        
+        $('.creatureselect').removeClass('creatureselect')
+        
+        $('#g' + g + 'c' + c).addClass('creatureselect')
+        
+        $('#cname .value').html(genData[g - 1][c].name)
+        $('#cgen .value').html(g)
+        $('#cplace .value').html('C' + c)
+        
+        let score = genData[g - 1][c].score
+        
+        if (score === -1) {
+            score = "untested"
+        } 
+        
+        $('#cscore .value').html(score)
+        $('#cstatus .value').html(genData[g - 1][c].status)
+
+        for (i = 0; i < 6; i++) {
+            $('#cvar' + i + ' .value').html(genData[g - 1][c].genes[i].toFixed(4))
+        }
+
+        $('#familyparentids').html('')
+        $('#familychildrenids').html('')
+        
+        for (i = 0; i < genData[g - 1][c].parents.length; i++) {
+            $('#familyparentids').append($('#' + genData[g - 1][c].parents[i])[0].outerHTML)
+        }
+
+        console.log(genData[g - 1][c].parents)
+    }
+    
+    $(document).on('click', '.creature', function() {
+        updateInfoBar($(this).parent().index() + 1, $(this).index() - 1)
+        displayCurrentCreature = false
+    })
+    
+    $(document).on('click', '#gamearea', function() {
+        displayCurrentCreature = true
+        updateInfoBar(genData.length, currentCreature)
+    })
     
     $(document).on('gameover', function(event, score) {
         
         console.log("C" + currentCreature + ": " + genData[genData.length - 1][currentCreature].genes)
-        //console.log("Score is: " + score)
-        if (score > highestScore) {
-            highestScore = score
-        }
-        //console.log("Highest Score is: " + highestScore)
         
+        var currGen = genData.length,
+            i = 0
         
-        var currGen = genData.length
         
         $('#g' + genData.length + 'c' + currentCreature).removeClass("c_testing")
         $('#g' + genData.length + 'c' + currentCreature).addClass("c_tested")
@@ -410,6 +450,11 @@ var learner = (function() {
             $('#g' + genData.length + 'c' + (currentCreature + 1)).removeClass("c_untested")
             $('#g' + genData.length + 'c' + (currentCreature + 1)).addClass("c_testing")
             currentCreature++
+            
+            if (displayCurrentCreature) {
+                updateInfoBar(currGen, currentCreature)
+            }
+            
         } else {
             newGen()
         }
@@ -499,7 +544,7 @@ var learner = (function() {
                     let newCreature = {
                         "name" : chance.first(),
                         "score" : -1,
-                        "parents" : "g" + (currentGen - 1) + "c" + arrCopy[i].placeInGen + ", " + "g" + (currentGen - 1) + "c" + arrCopy[j].placeInGen,
+                        "parents" : ["g" + (currentGen - 1) + "c" + arrCopy[i].placeInGen, "g" + (currentGen - 1) + "c" + arrCopy[j].placeInGen],
                         "placeInGen" : l,
                         "status" : "untested",
                         "genes" : newGenome // Max Height, Avg Height, Std Dev Height, Covered Holes
@@ -512,7 +557,7 @@ var learner = (function() {
                         + currentGen
                         + 'c'
                         + l 
-                        + '"><p class="creaturenumber">C'
+                        + '"><div class="coverlay"></div><div class="coverlay2"></div><p class="creaturenumber">C'
                         + l
                         + '</p><p class="creaturescore">0</p><p class="creaturename">'
                         + newCreature.name
@@ -545,7 +590,7 @@ var learner = (function() {
                 let newCreature = {
                     "name" : chance.first(),
                     "score" : -1,
-                    "parents" : "",
+                    "parents" : [],
                     "placeInGen" : i,
                     "status" : "untested",
                     "genes" : [Math.random(), Math.random(), Math.random(), Math.random(), Math.random(), Math.random()] // Max Height, Avg Height, Std Dev Height, Covered Holes, 3 tile deep holes
@@ -558,7 +603,7 @@ var learner = (function() {
                     + currentGen
                     + 'c'
                     + i 
-                    + '"><p class="creaturenumber">C'
+                    + '"><div class="coverlay"></div><div class="coverlay2"></div><p class="creaturenumber">C'
                     + i
                     + '</p><p class="creaturescore">0</p><p class="creaturename">'
                     + newCreature.name
@@ -576,7 +621,9 @@ var learner = (function() {
 
         currentCreature = 0
         
-        
+        if (displayCurrentCreature) {
+            updateInfoBar(currentGen, 0)
+        }
         
         $('#g' + genData.length + 'c0').addClass("c_testing")
         $('#g' + genData.length + 'c0').removeClass("c_untested")
