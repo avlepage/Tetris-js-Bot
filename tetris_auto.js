@@ -400,7 +400,7 @@ var learner = (function() {
         $('#cgen .value').html(g)
         $('#cplace .value').html('C' + c)
         
-        let score = genData[g - 1][c].score
+        var score = genData[g - 1][c].score
         
         if (score === -1) {
             score = "untested"
